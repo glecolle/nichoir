@@ -67,7 +67,8 @@ echo "collect files since $since minutes ("$(( $since /60 )) "hours)"
 ssh root@${host} "find www/record -type f -name '*.mp4' -mmin -$since" | sed "s;www/record/;;g" > remote_files.txt
 echo $( cat remote_files.txt | wc -l ) "raw videos"
 
-cat remote_files.txt | grep -vP '(0[01234]|2[123])H' | grep -vP "05H/E200M00S60.mp4" > filtered_remote_files.txt
+#cat remote_files.txt | grep -vP '(0[01234]|2[123])H' | grep -vP "05H/E200M00S60.mp4" > filtered_remote_files.txt
+cat remote_files.txt > filtered_remote_files.txt
 echo $( cat filtered_remote_files.txt | wc -l ) "new videos to copy"
 
 find $RAW/$VIDEOS -type f -name '*.mp4' | sed "s;$RAW/$VIDEOS/;;g" > local_files.txt

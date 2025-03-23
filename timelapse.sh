@@ -4,13 +4,15 @@ if [ -z "$1" ]; then
     echo "$(basename $0) fps [minSizeKB] directories "
     echo "fps:  the number of frames per second, higher number will reduce the duration of the video."
     echo "directories: copy files from directories, rename them as a sequence of images and create a video file, use existing images in timelapse dir if omitted."
-    echo "minSizeKB: remove files smaller than this size in KiBi (150 is a good choice)."
+    echo "minSizeKB: remove files smaller than this size in KiBi (160 is a good choice)."
     exit
 fi
 
 mkdir -p timelapse
 
+# TODO si se termine par un s, calculer le fps à partir du nombre d'image et de la durée en secondes
 fps=$1
+
 shift
 
 minSizeKB=0
@@ -44,5 +46,5 @@ if [ -n "$1" ] ; then
     echo "images files copied to timelapse directory and renamed as a sequence"
 fi
 
-ffmpeg -framerate $fps -i "timelapse/img%07d.jpg" -c:v libx264 -crf 15 -preset medium timelapse_${fps}fps.mp4
+ffmpeg -framerate $fps -i "timelapse/img%07d.jpg" -c:v libx264 -crf 15 -preset medium -r 30 timelapse_${fps}fps.mp4
 echo "created timelapse_${fps}fps.mp4"
