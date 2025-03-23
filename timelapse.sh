@@ -1,18 +1,16 @@
 #!/bin/bash
 
 if [ -z "$1" ]; then
-    echo "$(basename $0) fps [minSizeKB] directories "
-    echo "fps:  the number of frames per second, higher number will reduce the duration of the video."
+    echo "$(basename $0) fps_duration [minSizeKB] directories "
+    echo "fps_duration:  the number of frames per second "30" or the duration "10s" to compute the number of fps to match the target duration in seconds."
+    echo "minSizeKB: remove files smaller than this size in KiBi (165 is a good choice)."
     echo "directories: copy files from directories, rename them as a sequence of images and create a video file, use existing images in timelapse dir if omitted."
-    echo "minSizeKB: remove files smaller than this size in KiBi (160 is a good choice)."
     exit
 fi
 
 mkdir -p timelapse
 
-# TODO si se termine par un s, calculer le fps à partir du nombre d'image et de la durée en secondes
 fps=$1
-
 shift
 
 minSizeKB=0
@@ -24,7 +22,6 @@ fi
 if [ -n "$1" ] ; then
     rm -f timelapse/img*.jpg
 
-    echo "copying images"
     while [ -n "$1" ] ; do
         echo "copy images from $1"
         cp "$1"/*.jpg timelapse
@@ -44,6 +41,15 @@ if [ -n "$1" ] ; then
     done
 
     echo "images files copied to timelapse directory and renamed as a sequence"
+fi
+
+if [[ "$fps" =~ [0-9]+s ]] ; then
+    nb=$(ls timelapse/*.jpg | wc -l)
+    duration=$(echo $fps | tr "s" " ")
+    fps=$(( $nb / $duration ))
+    echo "using $nb files to target a duration of ${duration}seconds, fps is $fps"
+else
+    fps=$1
 fi
 
 ffmpeg -framerate $fps -i "timelapse/img%07d.jpg" -c:v libx264 -crf 15 -preset medium -r 30 timelapse_${fps}fps.mp4
