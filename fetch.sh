@@ -128,3 +128,5 @@ find $RAW -type d -empty -delete
 # last_update.txt will be used on next fetch to determine since when files have to retrieved
 mv remote_files.txt last_update.txt
 rm *_files.txt new_directories.txt
+
+./visits.sh $dateDir
