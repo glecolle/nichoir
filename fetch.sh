@@ -2,6 +2,8 @@
 
 #set -x
 
+# param1: force number of hours to resume collect instead of using last update time
+
 # relative directories
 RAW=raw
 MEDIA=media
@@ -34,13 +36,6 @@ function copyNew() {
 	done
 }
 
-if [ -z "$1 false" ] ; then
-	echo $(basename $0)" month day [snap|video|all]"
-	echo "fetch videos for specified day and month"
-	echo "add snap to only download snapshots, add video to only download videos"
-	exit
-fi
-
 cd $(dirname $0)
 
 if [ ! -d $RAW/$VIDEOS ]; then
@@ -59,8 +54,9 @@ fi
 if [ -z "$1" ] ; then
 	since=$(latestFile)
 	lastUpdateTS=$(stat --format=%Y last_update.txt)
+	echo "resuming from last update"
 else
-	since="$1"
+	since=$(( $1 * 60 ))
 fi
 echo "collect files since $since minutes ("$(( $since /60 )) "hours)"
 
