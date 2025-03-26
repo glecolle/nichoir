@@ -25,7 +25,7 @@ if [ $hours = 1 ]; then
         count=$(find media -path "media/$days/${h}_*_*_dur*.mp4" | wc -l)
         l="$h : "
         for i in $(seq 1 $count) ; do
-            l=${l}"▉"
+            l=${l}"•"
         done
         if [ $count != 0 ] ; then
             l="$l $count"
@@ -38,7 +38,7 @@ else
         dayCount=$(find ${d} -name "*_dur*.mp4" | wc -l)
         l="$d: "
         for i in $(seq 1 $dayCount) ; do
-            l=${l}"▉"
+            l=${l}"•"
         done
 
         echo "$l $dayCount"
