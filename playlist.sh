@@ -1,21 +1,20 @@
 #!/bin/bash
 
 if [ -z "$1" ] ; then
-    echo "Usage: $(basename $0) <dir1> <dir2> ..."
-    echo "Create a playlist file for each directory"
+    echo "Usage: $(basename $0) <dir1> <suffix>"
+    echo "Create a playlist file for "
     exit
 fi
 
-while [ -n "$1" ] ; do
-    targetDir=$1
-    shift
 
-    cd $targetDir
-    playlistFile=playlist.m3u
-    echo "#EXTM3U" > ${playlistFile}
+targetDir=$1
+suffix=$2
 
-    ls *dur*.mp4 >> $playlistFile
-    cd - > /dev/null
+cd $targetDir
+playlistFile=playlist${suffix}.m3u
+echo "#EXTM3U" > ${playlistFile}
 
-    echo "created playlist $playlistFile"
-done
+ls *dur*${suffix}.mp4 >> $playlistFile
+cd - > /dev/null
+
+echo "created playlist $playlistFile (for suffix $suffix)"

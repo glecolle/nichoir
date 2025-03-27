@@ -2,7 +2,8 @@
 
 #set -x
 
-# param1: force number of hours to resume collect instead of using last update time
+# param1: optional ip address for source camera
+# param2: force number of hours to resume collect instead of using last update time
 
 # relative directories
 RAW=raw
@@ -11,6 +12,8 @@ VIDEOS=videos
 SNAPSHOTS=snapshots
 
 host="192.168.1.10"
+suffix=""
+timeout=5
 
 # return the number of minutes since last download or long ago if not found
 function latestFile() {
@@ -32,7 +35,7 @@ function latestFile() {
 function copyNew() {
 	cat $2 | while read d ; do
 		mkdir -p $3/$(basename $d)
-		scp $1/$d/* $3/$(basename $d)
+		scp -o ConnectTimeout=$timeout $1/$d/* $3/$(basename $d)
 	done
 }
 
@@ -51,6 +54,14 @@ if [ ! -d $SNPASHOTS ]; then
 	mkdir $SNAPSHOTS
 fi
 
+if [[ "$1" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+	host=$1
+	suffix=$2
+	echo "fetching from $host with suffix $suffix"
+	shift
+	shift
+fi
+
 if [ -z "$1" ] ; then
 	since=$(latestFile)
 	lastUpdateTS=$(stat --format=%Y last_update.txt)
@@ -60,8 +71,8 @@ else
 fi
 echo "collect files since $since minutes ("$(( $since /60 )) "hours)"
 
-ssh root@${host} "find www/record -type f -name '*.mp4' -mmin -$since" | sed "s;www/record/;;g" > remote_files.txt
-echo $( cat remote_files.txt | wc -l ) "raw videos"
+ssh -o ConnectTimeout=$timeout root@${host} "find www/record -type f -name '*.mp4' -mmin -$since" | sed "s;www/record/;;g" > remote_files.txt
+echo $( cat remote_files.txt | wc -l ) " videos"
 
 #cat remote_files.txt | grep -vP '(0[01234]|2[123])H' | grep -vP "05H/E200M00S60.mp4" > filtered_remote_files.txt
 cat remote_files.txt > filtered_remote_files.txt
@@ -82,7 +93,7 @@ days=$(echo "$lastUpdate" | cat remote_files.txt - | cut -dD -f 1 | tr "YM" "--"
 for d in $days ; do
 	echo "copy snapshots of day $d"
 	mkdir -p $RAW/$SNAPSHOTS/$d
-	scp scp://root@${host}/snapshot/${d}/* $RAW/$SNAPSHOTS/$d
+	scp -o ConnectTimeout=$timeout scp://root@${host}/snapshot/${d}/* $RAW/$SNAPSHOTS/$d
 done
 
 # copy videos to media -> 08_06_00_dur60.mp4
@@ -100,10 +111,12 @@ for f in $(cat new_video_files.txt) ; do
 	# translate utc file name to local time
 	utc="${f:11:4}-${f:16:2}-${f:19:2}T${f:22:2}:${f:28:2}:${f:31:2}Z"
 	localTime=$(date -d "$utc" "+%Y-%m-%dT%H:%M:%S") # 2024-10-05T14:10:00
-	destFile="${localTime:11:2}_${localTime:14:2}_${localTime:17:2}_dur${f:34:2}.mp4"
+	destFile="${localTime:11:2}_${localTime:14:2}_${localTime:17:2}_dur${f:34:2}${suffix}.mp4"
 	cp $f ${dayDir}/${destFile}
 done
+
 if [ -n "$lastDay" ] ; then
+	./playlist.sh ${lastDay} ${suffix}
 	./playlist.sh ${lastDay}
 fi
 
@@ -122,7 +135,11 @@ find $RAW -type f -mtime +15 -delete
 find $RAW -type d -empty -delete
 
 # last_update.txt will be used on next fetch to determine since when files have to retrieved
-mv remote_files.txt last_update.txt
+if [ $(stat -c %s remote_files.txt) == 0 ] ; then
+	echo "ignoring this update since no files were fetched"
+else
+	mv remote_files.txt last_update.txt
+fi
 rm *_files.txt new_directories.txt
 
 ./visits.sh $dateDir

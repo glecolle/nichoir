@@ -13,6 +13,8 @@ mkdir -p timelapse
 fps=$1
 shift
 
+targetFile="timelapse_${fps}.mp4"
+
 minSizeKB=0
 if [[ "$1" =~ ^[0-9]+$ ]] ; then
     minSizeKB=$1
@@ -52,5 +54,5 @@ else
     fps=$1
 fi
 
-ffmpeg -framerate $fps -i "timelapse/img%07d.jpg" -c:v libx264 -crf 15 -preset medium -r 30 timelapse_${fps}fps.mp4
-echo "created timelapse_${fps}fps.mp4"
+ffmpeg -framerate $fps -i "timelapse/img%07d.jpg" -c:v libx264 -crf 15 -preset medium -r 30 $targetFile
+echo "created $targetFile"
