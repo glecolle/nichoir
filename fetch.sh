@@ -17,7 +17,7 @@ timeout=5
 
 # return the number of minutes since last download or long ago if not found
 function latestFile() {
-	local f="last_update.txt"
+	local f="last_update${suffix}.txt"
 
 	if [ ! -e "$f" ] ; then
 		echo $(( 60 * 24 * 14 ))
@@ -57,6 +57,7 @@ fi
 if [[ "$1" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
 	host=$1
 	suffix=$2
+	RAW="${RAW}${suffix}"
 	echo "fetching from $host with suffix $suffix"
 	shift
 	shift
@@ -64,7 +65,7 @@ fi
 
 if [ -z "$1" ] ; then
 	since=$(latestFile)
-	lastUpdateTS=$(stat --format=%Y last_update.txt)
+	lastUpdateTS=$(stat --format=%Y last_update${suffix}.txt)
 	echo "resuming from last update"
 else
 	since=$(( $1 * 60 ))
@@ -97,23 +98,25 @@ for d in $days ; do
 done
 
 # copy videos to media -> 08_06_00_dur60.mp4
-find $RAW/$VIDEOS -type f -mmin -$since > new_video_files.txt # raw/videos/2024Y09M18D08H/E206M00S60.mp4
+cd $RAW
+find $VIDEOS -type f -mmin -$since > new_video_files.txt # videos/2024Y09M18D08H/E206M00S60.mp4
 lastDay=""
 for f in $(cat new_video_files.txt) ; do
-	dayDir=$MEDIA/${f:11:4}-${f:16:2}-${f:19:2}
+	dayDir=$MEDIA/${f:7:4}-${f:12:2}-${f:15:2}
 	if [ -n "$lastDay" ] && [ "$dayDir" != "$lastDay" ] ; then
-		./playlist.sh ${lastDay}
+		../playlist.sh ${lastDay}
 	fi
 	lastDay="$dayDir"
 
-	mkdir -p $dayDir
+	mkdir -p ../$dayDir
 
 	# translate utc file name to local time
-	utc="${f:11:4}-${f:16:2}-${f:19:2}T${f:22:2}:${f:28:2}:${f:31:2}Z"
+	utc="${f:7:4}-${f:12:2}-${f:15:2}T${f:18:2}:${f:24:2}:${f:27:2}Z"
 	localTime=$(date -d "$utc" "+%Y-%m-%dT%H:%M:%S") # 2024-10-05T14:10:00
-	destFile="${localTime:11:2}_${localTime:14:2}_${localTime:17:2}_dur${f:34:2}${suffix}.mp4"
-	cp $f ${dayDir}/${destFile}
+	destFile="${localTime:11:2}_${localTime:14:2}_${localTime:17:2}_dur${f:30:2}${suffix}.mp4"
+	cp $f ../${dayDir}/${destFile}
 done
+cd -
 
 if [ -n "$lastDay" ] ; then
 	./playlist.sh ${lastDay} ${suffix}
@@ -121,24 +124,26 @@ if [ -n "$lastDay" ] ; then
 fi
 
 # copy snapshots to media
-find $RAW/$SNAPSHOTS -type f -mmin -$since > new_snapshot_files.txt # raw/snapshots/2024-09-19/2024-09-19_06_10.jpg to media/YYYY-MM-DD/snapshots/YYYY_MM_DD_HH_MM.jpg
+cd $RAW
+find $SNAPSHOTS -type f -mmin -$since > new_snapshot_files.txt # snapshots/2024-09-19/2024-09-19_06_10.jpg to media/YYYY-MM-DD/snapshots/YYYY_MM_DD_HH_MM.jpg
 for f in $(cat new_snapshot_files.txt) ; do
-	dateDir=${f:14:4}-${f:19:2}-${f:22:2}
-	dateFile=${f:14:4}_${f:19:2}_${f:22:2}
-	timeFile=${f:36:2}_${f:39:2}
-	mkdir -p media/${dateDir}/snapshots
-	cp $f media/${dateDir}/snapshots/${dateFile}_${timeFile}.jpg
+	dateDir=${f:10:4}-${f:15:2}-${f:18:2}
+	dateFile=${f:10:4}_${f:15:2}_${f:18:2}
+	timeFile=${f:32:2}_${f:35:2}
+	mkdir -p ../media/${dateDir}/snapshots
+	cp $f ../media/${dateDir}/snapshots/${dateFile}_${timeFile}.jpg
 done
+cd -
 
 # clean up old files in raw directory
 find $RAW -type f -mtime +15 -delete
 find $RAW -type d -empty -delete
 
-# last_update.txt will be used on next fetch to determine since when files have to retrieved
+# last_update_suffix.txt will be used on next fetch to determine since when files have to retrieved
 if [ $(stat -c %s remote_files.txt) == 0 ] ; then
 	echo "ignoring this update since no files were fetched"
 else
-	mv remote_files.txt last_update.txt
+	mv remote_files.txt "last_update${suffix}.txt"
 fi
 rm *_files.txt new_directories.txt
 
