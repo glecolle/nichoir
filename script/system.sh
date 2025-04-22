@@ -180,6 +180,12 @@ fi
 mount --bind $YI_HACK_PREFIX/bin/cloudAPI $YI_PREFIX/cloudAPI
 
 log "Starting yi processes" 1
+
+# reduce wartermark visibility
+if [ -f /tmp/sd/yi-hack/main.bmp ] ; then
+    mount --bind /tmp/sd/yi-hack/main.bmp /home/app/main_kami.bmp
+fi
+
 if [[ $(get_config DISABLE_CLOUD) == "no" ]] ; then
     (
         if [ $(get_config RTSP_AUDIO) == "pcm" ] || [ $(get_config RTSP_AUDIO) == "alaw" ] || [ $(get_config RTSP_AUDIO) == "ulaw" ]; then
