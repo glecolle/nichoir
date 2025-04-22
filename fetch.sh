@@ -32,14 +32,14 @@ function latestFile() {
 # param1 remote directory command and prefix
 # param2 file containing the directories to copy like 2024Y09M04D06H
 # param3 targetDir local directory
-function copyNew() {
+function fetchNew() {
 	cat $2 | while read d ; do
 		echo "fetch files from $d"
 		mkdir -p $3/$(basename $d)
 		scp -o ConnectTimeout=$timeout $1/$d/* $3/$(basename $d)
 
 		if [ "$?" != 0 ] ; then
-			echo "error while fetching files"
+			echo "error while fetching videos"
 			exit 1
 		fi
 
@@ -70,7 +70,7 @@ function updateMedia() {
 		destFile="${localTime:11:2}_${localTime:14:2}_${localTime:17:2}_dur${f:30:2}${suffix}.mp4"
 		cp $f ../${dayDir}/${destFile}
 	done
-	cd -
+	cd - > /dev/null
 }
 
 function updatePlaylist() {
@@ -117,7 +117,7 @@ fi
 if [ -z "$1" ] ; then
 	since=$(latestFile)
 	lastUpdateTS=$(stat --format=%Y last_update${suffix}.txt)
-	echo "resuming from last update: $since"
+	# echo "resuming from last update: $since"
 else
 	since=$(( $1 * 60 ))
 fi
@@ -133,7 +133,7 @@ find $RAW/$VIDEOS -type f -name '*.mp4' | sed "s;$RAW/$VIDEOS/;;g" > local_files
 diff remote_files.txt local_files.txt | grep '<' | sed "s/< //" > new_files.txt
 
 cat new_files.txt | cut -d/ -f 1 | sort | uniq > new_directories.txt
-copyNew "scp://root@${host}/www/record" new_directories.txt $RAW/$VIDEOS
+fetchNew "scp://root@${host}/www/record" new_directories.txt $RAW/$VIDEOS
 
 if [ -n "$lastUpdateTS" ] ;then
 	lastUpdate=$(date -d @${lastUpdateTS} +"%Y-%m-%d")
@@ -145,6 +145,11 @@ for d in $days ; do
 	echo "copy snapshots of day $d"
 	mkdir -p $RAW/$SNAPSHOTS/$d
 	scp -o ConnectTimeout=$timeout scp://root@${host}/snapshot/${d}/* $RAW/$SNAPSHOTS/$d
+
+	if [ "$?" != 0 ] ; then
+		echo "error while fetching snapshots"
+		exit 1
+	fi
 done
 
 # copy snapshots to media
@@ -157,7 +162,7 @@ for f in $(cat new_snapshot_files.txt) ; do
 	mkdir -p ../$MEDIA/${dateDir}/snapshots
 	cp $f ../$MEDIA/${dateDir}/snapshots/${dateFile}_${timeFile}.jpg
 done
-cd -
+cd - > /dev/null
 
 # clean up old files in raw directory
 find $RAW -type f -mtime +15 -delete
@@ -166,7 +171,6 @@ find $RAW -type d -empty -delete
 rm *_files.txt new_directories.txt
 
 setLastUpdate $begin
-
 removeRemoteFiles
 
 ./visits.sh $dateDir

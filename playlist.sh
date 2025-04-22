@@ -17,4 +17,4 @@ echo "#EXTM3U" > ${playlistFile}
 ls *dur*${suffix}.mp4 >> $playlistFile
 cd - > /dev/null
 
-echo "created playlist $playlistFile in $targetDir (for suffix $suffix)"
+echo "updated playlist $playlistFile in $targetDir (for suffix $suffix)"
