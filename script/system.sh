@@ -181,7 +181,7 @@ mount --bind $YI_HACK_PREFIX/bin/cloudAPI $YI_PREFIX/cloudAPI
 
 log "Starting yi processes" 1
 
-# reduce wartermark visibility
+# reduce wartermark visibility (HD)
 if [ -f /tmp/sd/yi-hack/main.bmp ] ; then
     mount --bind /tmp/sd/yi-hack/main.bmp /home/app/main_kami.bmp
 fi
