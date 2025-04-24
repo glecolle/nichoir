@@ -186,6 +186,11 @@ if [ -f /tmp/sd/yi-hack/main.bmp ] ; then
     mount --bind /tmp/sd/yi-hack/main.bmp /home/app/main_kami.bmp
 fi
 
+# reduce wartermark visibility (SD)
+if [ -f /tmp/sd/yi-hack/sub.bmp ] ; then
+    mount --bind /tmp/sd/yi-hack/sub.bmp /home/app/sub_kami.bmp
+fi
+
 if [[ $(get_config DISABLE_CLOUD) == "no" ]] ; then
     (
         if [ $(get_config RTSP_AUDIO) == "pcm" ] || [ $(get_config RTSP_AUDIO) == "alaw" ] || [ $(get_config RTSP_AUDIO) == "ulaw" ]; then
