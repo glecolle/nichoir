@@ -135,6 +135,10 @@ diff remote_files.txt local_files.txt | grep '<' | sed "s/< //" > new_files.txt
 cat new_files.txt | cut -d/ -f 1 | sort | uniq > new_directories.txt
 fetchNew "scp://root@${host}/www/record" new_directories.txt $RAW/$VIDEOS
 
+if [ $? != 0 ] ; then
+	exit 1
+fi
+
 if [ -n "$lastUpdateTS" ] ;then
 	lastUpdate=$(date -d @${lastUpdateTS} +"%Y-%m-%d")
 fi

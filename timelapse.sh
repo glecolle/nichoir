@@ -49,7 +49,7 @@ if [[ "$fps" =~ [0-9]+s ]] ; then
     nb=$(ls timelapse/*.jpg | wc -l)
     duration=$(echo $fps | tr "s" " ")
     fps=$(( $nb / $duration ))
-    echo "using $nb files to target a duration of ${duration}seconds, fps is $fps"
+    echo "using $nb files to target a duration of ${duration}seconds, that is $fps fps"
 else
     fps=$1
 fi
