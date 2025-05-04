@@ -10,6 +10,8 @@ RAW=raw
 MEDIA=media
 VIDEOS=videos
 SNAPSHOTS=snapshots
+MAX_KB=3200 # kbps
+DELAY_REMOVE_MINUTES=3000
 
 host="192.168.1.10"
 suffix=""
@@ -36,7 +38,7 @@ function fetchNew() {
 	cat $2 | while read d ; do
 		echo "fetch files from $d"
 		mkdir -p $3/$(basename $d)
-		scp -o ConnectTimeout=$timeout $1/$d/* $3/$(basename $d)
+		scp -o ConnectTimeout=$timeout -l $MAX_KB $1/$d/* $3/$(basename $d)
 
 		if [ "$?" != 0 ] ; then
 			echo "error while fetching videos"
@@ -87,7 +89,7 @@ function setLastUpdate() {
 }
 
 function removeRemoteFiles() {
-	ssh -o ConnectTimeout=$timeout root@${host} "find www/record -type f -name '*.mp4' -mmin +1500 -delete"
+	ssh -o ConnectTimeout=$timeout root@${host} "find www/record -type f -name '*.mp4' -mmin +$DELAY_REMOVE_MINUTES -delete"
 }
 
 cd $(dirname $0)
@@ -148,7 +150,7 @@ days=$(echo "$lastUpdate" | cat remote_files.txt - | cut -dD -f 1 | tr "YM" "--"
 for d in $days ; do
 	echo "copy snapshots of day $d"
 	mkdir -p $RAW/$SNAPSHOTS/$d
-	scp -o ConnectTimeout=$timeout scp://root@${host}/snapshot/${d}/* $RAW/$SNAPSHOTS/$d
+	scp -o ConnectTimeout=$timeout -l $MAX_KB scp://root@${host}/snapshot/${d}/* $RAW/$SNAPSHOTS/$d
 
 	if [ "$?" != 0 ] ; then
 		echo "error while fetching snapshots"
