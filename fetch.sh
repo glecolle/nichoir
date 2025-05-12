@@ -10,12 +10,13 @@ RAW=raw
 MEDIA=media
 VIDEOS=videos
 SNAPSHOTS=snapshots
-MAX_KB=3200 # kbps
+MAX_KB=4800 # kbps to limit CPU load on this small hardware
 DELAY_REMOVE_MINUTES=3000
 
 host="192.168.1.10"
 suffix=""
-timeout=5
+timeout=25
+beginTS=$(date +%s)
 
 # return the number of minutes since last update or long ago if not found
 function latestFile() {
@@ -36,7 +37,9 @@ function latestFile() {
 # param3 targetDir local directory
 function fetchNew() {
 	cat $2 | while read d ; do
-		echo "fetch files from $d"
+		local now=$(date +%s)
+		local elapsed=$(( ($now - $beginTS) / 60 ))
+		echo "($elapsed min) fetching files from $d"
 		mkdir -p $3/$(basename $d)
 		scp -o ConnectTimeout=$timeout -l $MAX_KB $1/$d/* $3/$(basename $d)
 

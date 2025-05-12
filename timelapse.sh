@@ -10,7 +10,8 @@ fi
 
 mkdir -p timelapse
 
-fps=$1
+fps=$1 # fps or desired duration in seconds with "s" suffix
+target_fps=30
 shift
 
 targetFile="timelapse_${fps}.mp4"
@@ -54,5 +55,5 @@ else
     fps=$1
 fi
 
-ffmpeg -framerate $fps -i "timelapse/img%07d.jpg" -c:v libx264 -crf 15 -preset medium -r 30 $targetFile
+ffmpeg -framerate $fps -i "timelapse/img%07d.jpg" -c:v libx265 -crf 15 -preset medium -r $target_fps $targetFile
 echo "created $targetFile"
