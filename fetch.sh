@@ -10,7 +10,7 @@ RAW=raw
 MEDIA=media
 VIDEOS=videos
 SNAPSHOTS=snapshots
-MAX_KB=4800 # kbps to limit CPU load on this small hardware
+MAX_KB=7000 # kbps to limit CPU load on this small hardware
 DELAY_REMOVE_MINUTES=3000
 
 host="192.168.1.10"
