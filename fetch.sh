@@ -153,7 +153,7 @@ days=$(echo "$lastUpdate" | cat remote_files.txt - | cut -dD -f 1 | tr "YM" "--"
 for d in $days ; do
 	echo "copy snapshots of day $d"
 	mkdir -p $RAW/$SNAPSHOTS/$d
-	scp -o ConnectTimeout=$timeout -l $MAX_KB scp://root@${host}/snapshot/${d}/* $RAW/$SNAPSHOTS/$d
+	scp -q -o ConnectTimeout=$timeout -l $MAX_KB scp://root@${host}/snapshot/${d}/* $RAW/$SNAPSHOTS/$d
 
 	if [ "$?" != 0 ] ; then
 		echo "error while fetching snapshots"
