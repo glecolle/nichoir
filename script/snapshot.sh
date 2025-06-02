@@ -8,10 +8,6 @@ file=$(date +%Y-%m-%d_%H_%M.jpg)
 
 mkdir -p $dir
 
-# version web
-#wget http://127.0.0.1/cgi-bin/snapshot.sh\?res=high\&watermark=no -O $dir/$file
-
-# version sans doute moins gourmande en ressources:
 YI_HACK_PREFIX="/tmp/sd/yi-hack"
 MODEL_SUFFIX=$(cat $YI_HACK_PREFIX/model_suffix)
-imggrabber -m $MODEL_SUFFIX -r high -w > $dir/$file
+imggrabber -m $MODEL_SUFFIX -r high > $dir/$file
