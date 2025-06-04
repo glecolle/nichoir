@@ -55,5 +55,5 @@ else
     fps=$1
 fi
 
-ffmpeg -framerate $fps -i "timelapse/img%07d.jpg" -c:v libx265 -crf 15 -preset medium -r $target_fps $targetFile
+ffmpeg -framerate $fps -i "timelapse/img%07d.jpg" -c:v libx265 -crf 18 -preset medium -r $target_fps $targetFile
 echo "created $targetFile"

@@ -63,7 +63,9 @@ function updateMedia() {
 	for f in $(cat new_video_files.txt) ; do
 		dayDir=$MEDIA/${f:7:4}-${f:12:2}-${f:15:2}
 		if [ -n "$lastDay" ] && [ "$dayDir" != "$lastDay" ] ; then
-			../playlist.sh ${lastDay}
+			cd ..
+			./playlist.sh ${lastDay}
+			cd $RAW
 		fi
 		lastDay="$dayDir"
 
@@ -75,7 +77,7 @@ function updateMedia() {
 		destFile="${localTime:11:2}_${localTime:14:2}_${localTime:17:2}_dur${f:30:2}${suffix}.mp4"
 		cp $f ../${dayDir}/${destFile}
 	done
-	cd - > /dev/null
+	cd .. > /dev/null
 }
 
 function updatePlaylist() {
@@ -168,8 +170,8 @@ for f in $(cat new_snapshot_files.txt) ; do
 	dateDir=${f:10:4}-${f:15:2}-${f:18:2}
 	dateFile=${f:10:4}_${f:15:2}_${f:18:2}
 	timeFile=${f:32:2}_${f:35:2}
-	mkdir -p ../$MEDIA/${dateDir}/snapshots
-	cp $f ../$MEDIA/${dateDir}/snapshots/${dateFile}_${timeFile}.jpg
+	mkdir -p ../$MEDIA/${dateDir}/snapshots${suffix}
+	cp $f ../$MEDIA/${dateDir}/snapshots${suffix}/${dateFile}_${timeFile}.jpg
 done
 cd - > /dev/null
 

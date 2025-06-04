@@ -2,7 +2,7 @@
 
 if [ -z "$1" ] ; then
     echo "Usage: $(basename $0) <dir1> <suffix>"
-    echo "Create a playlist file for "
+    echo "Create a playlist file for all videos within a directory"
     exit
 fi
 
