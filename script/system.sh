@@ -277,11 +277,12 @@ log "Yi processes started successfully" 1
 
 export TZ=$(get_config TIMEZONE)
 
+mkdir -p /tmp/sd/record
+mkdir -p /tmp/sd/yi-hack/www/record
+mount --bind /tmp/sd/record /tmp/sd/yi-hack/www/record
+
 if [[ $(get_config HTTPD) == "yes" ]] ; then
     log "Starting http"
-    mkdir -p /tmp/sd/record
-    mkdir -p /tmp/sd/yi-hack/www/record
-    mount --bind /tmp/sd/record /tmp/sd/yi-hack/www/record
     httpd -p $HTTPD_PORT -h $YI_HACK_PREFIX/www/ -c /tmp/httpd.conf
 fi
 

@@ -10,8 +10,9 @@ RAW=raw
 MEDIA=media
 VIDEOS=videos
 SNAPSHOTS=snapshots
-MAX_KB=7000 # kbps to limit CPU load on this small hardware
+MAX_KB=9600 # kbps to limit CPU load on this small hardware, 10000KB uses 15% CPU while scp
 DELAY_REMOVE_MINUTES=3000
+QUIET_SNAPSHOT_COPY="-q"
 
 host="192.168.1.10"
 suffix=""
@@ -155,7 +156,7 @@ days=$(echo "$lastUpdate" | cat remote_files.txt - | cut -dD -f 1 | tr "YM" "--"
 for d in $days ; do
 	echo "copy snapshots of day $d"
 	mkdir -p $RAW/$SNAPSHOTS/$d
-	scp -q -o ConnectTimeout=$timeout -l $MAX_KB scp://root@${host}/snapshot/${d}/* $RAW/$SNAPSHOTS/$d
+	scp $QUIET_SNAPSHOT_COPY -o ConnectTimeout=$timeout -l $MAX_KB scp://root@${host}/snapshot/${d}/* $RAW/$SNAPSHOTS/$d
 
 	if [ "$?" != 0 ] ; then
 		echo "error while fetching snapshots"
