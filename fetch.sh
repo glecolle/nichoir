@@ -98,6 +98,18 @@ function removeRemoteFiles() {
 	ssh -o ConnectTimeout=$timeout root@${host} "find www/record -type f -name '*.mp4' -mmin +$DELAY_REMOVE_MINUTES -delete"
 }
 
+function displayRemoteStats() {
+	cat > mem_stats.sh << 'EOF'
+echo -n "CPU: "
+grep 'cpu ' /proc/stat | awk '{usage=($2+$4)*100/($2+$4+$5)} END {print usage "%"}'
+free
+EOF
+
+	chmod u+x mem_stats.sh
+	scp -q -o ConnectTimeout=$timeout mem_stats.sh scp://root@${host}/
+	ssh -o ConnectTimeout=$timeout root@${host}	./mem_stats.sh
+}
+
 cd $(dirname $0)
 
 if [ ! -d $RAW/$VIDEOS ]; then
@@ -129,6 +141,8 @@ if [ -z "$1" ] ; then
 else
 	since=$(( $1 * 60 ))
 fi
+
+displayRemoteStats
 
 echo "collect files since $since minutes ("$(( $since / 60 )) "hours)"
 
